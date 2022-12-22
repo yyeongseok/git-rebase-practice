@@ -31,7 +31,28 @@ app.get('/ping', (req, res) => {
 feature/signin 브랜치의 경우 app.post('/users/signin', ...)
 feature/signup 브랜치의 경우 app.post('/users/signup', ...)
 */
+app.post('/users/signin', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await appDataSource.query(`
+    SELECT
+      users.id
+      users.password
+    FROM
+      users
+    WHERE
+      users.email = ?
+  `, [email]);
+  
+  if (!user) {
+    return res.json({message: "SIGNUP_REQUIRED"})
+  };
 
+  if (!(user[0].password === password)) {
+    return res.json({message: "INVALID_PASSWORD"})
+  };
+  
+  return res.json({ userId: user.id});
+})
 
 app.listen(PORT, () => {
   appDataSource.initialize()
